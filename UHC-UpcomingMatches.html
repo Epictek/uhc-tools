@@ -1,28 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>Upcoming UHC matches</title>
+    <style type="text/css">
+    body{
+    	padding: 0;margin:0;
+		font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+    }
+    #wrapper{
+    	padding:15px;
+    	position: absolute;
+    	top:80px;
+    }
+    </style>
 </head>
 <body>
+    <div style="position:absolute; width:100%; background-image:url(http://d.thumbs.redditmedia.com/EadjyCW3G_J57fLi.png);height:100px;border-bottom:2px solid #181818;">
+    <img style="position:relative; top:19px; left:3px;" src="http://d.thumbs.redditmedia.com/hYHQ9u1SFb4COMao.png" alt="ultra-hardcore" />
+    <a style="position:relative; top:27px; left:4px" href="http://reddit.com/r/ultrahardcore/"><img style="border:0" src="http://d.thumbs.redditmedia.com/f3s35HpkNRPPbG7o.png" alt="ultra-hardcore" /></a>
+    </div>
+    <div id="wrapper">
+    <p>(<b>New players</b> should definitely check out the <a href="http://reddit.com/r/ultrahardcore/wiki/playerfaq">PlayerFAQ</a> and <a href="http://reddit.com/r/ultrahardcore/wiki/glossary">Glossary</a> from the <a href="http://reddit.com/r/ultrahardcore/wiki/index">wiki</a>.)</p>
     <h1>Upcoming UHC matches</h1>
-    <p>This page shows upcoming UHC matches from the <a href="http://se.reddit.com/r/ultrahardcore/">ultrahardcore</a> subreddit.  (Source data: JSONP version of <a href="http://www.se.reddit.com/r/ultrahardcore/search?q=flair%3AUpcoming_Match&restrict_sr=on&sort=new">this page</a>.)</p>
+    <p>This page shows upcoming UHC matches from the <a href="http://reddit.com/r/ultrahardcore/">ultrahardcore</a> subreddit.  (Source data: JSONP version of <a href="http://www.reddit.com/r/ultrahardcore/search?q=flair%3AUpcoming_Match&amp;restrict_sr=on&amp;sort=new">this page</a>.)</p>
     <h3>Matches whose titles were successfully parsed</h3>
-    Note: <i>italicized titles</i> indicate 'best guess', as title is not perfectly formatted.
-    <br/>
     <div id="parsedplaceholder"></div>
+    <br/>Notes: 
+    <ul>
+        <li><i>Italicized titles</i> indicate a 'best guess', as title is not perfectly <a href="http://www.reddit.com/r/ultrahardcore/comments/1gk1ss/a_proposal_standardized_match_post_titles/">formatted</a>.</li>
+        <li><i>Italicized times</i> ("ago") indicate matches that have probably already begun, but that still have "Upcoming Match" flair.</li>
+        <li>Text size indicated how far ahead of time the match was advertised; small text is impromptus posted shortly before the match, large text is matches posted well in advance.</li>
+    </ul>
+    <noscript>(No data here, because Javascript is disabled on this page for some reason.)</noscript>
     <h3>Matches whose titles could not be parsed</h3>
     <div id="unparsedplaceholder"></div>
+    <noscript>(No data here, because Javascript is disabled on this page for some reason.)</noscript>
+    <h3>Some recently completed matches</h3>
+    <div id="parsedcompletedplaceholder"></div>
+    <noscript>(No data here, because Javascript is disabled on this page for some reason.)</noscript>
+    <hr/>
+    <p>(<a href="https://github.com/brianmcn/uhc-tools/blob/gh-pages/UHC-UpcomingMatches.html">Source code</a> for this page.  <a href="http://brianmcn.github.io/uhc-tools/UHC-UpcomingMatches.html">Self URL</a> of this page.)</p>
+    </div>
     <script type="text/javascript">
         // NOTE lack of year info means this script will not work over new years (Dec N - Jan N+1)
 
         function ago(currentTimeMsEpoch, p) {
-            var date = new Date();
-            date.setUTCMonth(p.month);
-            date.setUTCDate(p.date);
-            date.setUTCHours(p.hour);
-            date.setUTCMinutes(p.minute);
-            var dateMsEpoch = date.getTime();
+            var dateMsEpoch = p.dateMillis;
             var diffMs = Math.abs(currentTimeMsEpoch - dateMsEpoch);
             var words = "";
             if (diffMs > 1000 * 60 * 60 * 24) {
@@ -45,22 +69,51 @@
             }
         }
 
+        function fontStyleMarkup(p) {
+            var hoursAhead = (p.dateMillis - p.createdMillis) / (1000*60*60);
+            var weight = "normal";
+            var size = "100%"
+            if (hoursAhead < 1) {
+                weight = "lighter";
+                size = "85%"
+            }
+            if (hoursAhead > 3) {
+                weight = "bold";
+                size = "115%"
+            }
+            if (hoursAhead > 12) {
+                weight = "bolder";
+                size = "130%"
+            }
+            return "style='font-size:" + size + "'";
+        }
+
         function parseMonth(s) {
-            return (/Jul/i).test(s) ? 6 : null; // TODO parse all months, NOTE javascript uses 0-11 for months
+            return (/Jul/i).test(s) ? 6 : 
+                   (/Aug/i).test(s) ? 7 : 
+                   (/Sep/i).test(s) ? 8 :
+                   (/Oct/i).test(s) ? 9 :
+                   (/Nov/i).test(s) ? 10 :
+                   (/Dec/i).test(s) ? 11 : null; // TODO parse all months, NOTE javascript uses 0-11 for months
         }
 
         function myfunc(data) {
-            parsed = new Array();
-            unparsed = new Array();
+            var parsed = new Array();
+            var unparsed = new Array();
+            var isCompletedMatches = data.data.children.length == 100; // take advantage of 'limit' in reddit API
             for (var i in data.data.children) {
-                title = data.data.children[i].data.title;
-                url = data.data.children[i].data.url;
-                regex = /(\w*)( +)(\d+)( +)(\d+):(\d+)( +)UTC(.*)/;
-                r = regex.exec(title);
+                var title = data.data.children[i].data.title;
+                if (title.length > 100) {
+                    title = title.substr(0, 100) + "...";
+                }
+                var url = data.data.children[i].data.url;
+                var created_utc = data.data.children[i].data.created_utc;
+                var regex = /(\w*)( +)(\d+)( +)(\d+):(\d+)( +)UTC(.*)/;
+                var r = regex.exec(title);
                 if (r) {
-                    nMonth = parseMonth(r[1]);
+                    var nMonth = parseMonth(r[1]);
                     if (nMonth) {
-                        isPerfectMatch =
+                        var isPerfectMatch =
                             r[1].length == 3 && /[A-Z][a-z][a-z]/.test(r[1]) && // "Jul"
                             r[2].length == 1 && // " "
                             r[3].length == 2 && // "04"
@@ -69,7 +122,14 @@
                             r[6].length == 2 && // "59"
                             r[7].length == 1 && // " "   UTC
                             /^ - /.test(r[8]);  // " - "
-                        parsed.push({ title:title, url:url, month:nMonth, date:r[3], hour:r[5], minute:r[6], isPerfectMatch:isPerfectMatch });
+                        var date = new Date(0);
+                        date.setUTCFullYear(2013);
+                        date.setUTCMonth(nMonth);
+                        date.setUTCDate(+r[3]);
+                        date.setUTCHours(+r[5]);
+                        date.setUTCMinutes(+r[6]);
+                        var dateMillis = date.getTime();
+                        parsed.push({ title:title, url:url, month:nMonth, date:+r[3], hour:+r[5], minute:+r[6], dateMillis:dateMillis, createdMillis:created_utc*1000, isPerfectMatch:isPerfectMatch });
                     }
                     else {
                         unparsed.push({ title: title, url: url });
@@ -81,10 +141,7 @@
             }
 
             parsed.sort(function (a, b) {
-                return a.month < b.month ? -1 : a.month > b.month ? 1 :
-                       a.date < b.date ? -1 : a.date > b.date ? 1 :
-                       a.hour < b.hour ? -1 : a.hour > b.hour ? 1 :
-                       a.minute < b.minute ? -1 : a.minute > b.minute ? 1 : 0
+                return a.dateMillis < b.dateMillis ? -1 : a.dateMillis > b.dateMillis ? 1 : 0;
             });
 
             var currentTime = new Date();
@@ -93,25 +150,41 @@
             currentHours = currentHours.length == 1 ? "0" + currentHours : currentHours;
             var currentMinutes = currentTime.getUTCMinutes().toString();
             currentMinutes = currentMinutes.length == 1 ? "0" + currentMinutes : currentMinutes;
-            var output = "(Current UTC time is " + currentHours + ":" + currentMinutes + ")<br/><br/><table>";
-            parsed.forEach(function (p) {
-                var timeText = ago(currentTimeMsEpoch, p);
-                timeText = /ago$/.test(timeText) ? "<i>" + timeText + "</i>" : timeText;
-                output += "<tr><td align='center'>" + timeText + "</td><td>&nbsp;&nbsp;<td><a href='" + p.url + "'>" + (p.isPerfectMatch ? "" : "<i>") + p.title + (p.isPerfectMatch ? "" : "</i>") + "</a></td></tr>";
-            });
-            output += "</table>";
-            document.getElementById("parsedplaceholder").innerHTML = output;
-            output = "<ul>";
-            unparsed.forEach(function (p) {
-                output += "<li><a href='" + p.url + "'><i>" + p.title + "</i></a></li>";
-            });
-            output += "</ul>";
-            document.getElementById("unparsedplaceholder").innerHTML = output;
+            var output = "";
+            var show = function (p) {
+                    var timeText = ago(currentTimeMsEpoch, p);
+                    timeText = /ago$/.test(timeText) ? "<i>" + timeText + "</i>" : timeText;
+                    output += "<tr " + fontStyleMarkup(p) +"><td align='center'>" + timeText 
+                        + "</td><td>&nbsp;&nbsp;<td><a href='" + p.url + "'>" + (p.isPerfectMatch ? "" : "<i>") 
+                        + p.title + (p.isPerfectMatch ? "" : "</i>") + "</a></td><td>posted "
+                        + Math.floor((p.dateMillis - p.createdMillis) / (1000*60*60)) + " hours ahead</tr>";
+                };
+
+            if (isCompletedMatches) {
+                parsed.reverse();
+                output = "<table>";
+                parsed.forEach(show);
+                output += "</table>";
+                document.getElementById("parsedcompletedplaceholder").innerHTML = output;
+            }
+            else {
+                output = "(Current UTC time is " + currentHours + ":" + currentMinutes + ")<br/><br/><table>";
+                parsed.forEach(show);
+                output += "</table>";
+                document.getElementById("parsedplaceholder").innerHTML = output;
+                output = "<ul>";
+                unparsed.forEach(function (p) {
+                    output += "<li><a href='" + p.url + "'><i>" + p.title + "</i></a></li>";
+                });
+                output += "</ul>";
+                document.getElementById("unparsedplaceholder").innerHTML = output;
+            }
         }
     </script>
 
     <!-- use reddit JSONP apis to get page data as JSON and call myfunc with it -->
-    <script type="text/javascript" src="http://www.se.reddit.com/r/ultrahardcore/search.json?q=flair%3AUpcoming_Match&restrict_sr=on&sort=new&jsonp=myfunc"></script>
+    <script type="text/javascript" src="http://www.reddit.com/r/ultrahardcore/search.json?q=flair%3AUpcoming_Match&amp;restrict_sr=on&amp;sort=new&amp;limit=75&amp;jsonp=myfunc"></script>
+    <script type="text/javascript" src="http://www.reddit.com/r/ultrahardcore/search.json?q=flair%3ACompleted_Match&amp;restrict_sr=on&amp;sort=new&amp;limit=100&amp;jsonp=myfunc"></script>
 
 </body>
 </html>
