@@ -1,14 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>Upcoming UHC matches</title>
+    <style type="text/css">
+    body{
+    	padding: 0;margin:0;
+		font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+    }
+    #wrapper{
+    	padding:15px;
+    	position: absolute;
+    	top:80px;
+    }
+    </style>
 </head>
 <body>
-    <div style="background-image:url(http://d.thumbs.redditmedia.com/YWbcikVEGa8CpXlK.png);height:100px;border-bottom:2px solid #181818;">
-    <img src="http://d.thumbs.redditmedia.com/hYHQ9u1SFb4COMao.png" alt="ultra-hardcore" />
-    <a href="http://reddit.com/r/ultrahardcore/"><img style="border:0" src="http://a.thumbs.redditmedia.com/EjZkm0GBBCxT17F0.png" alt="ultra-hardcore" /></a>
+    <div style="position:absolute; width:100%; background-image:url(http://d.thumbs.redditmedia.com/EadjyCW3G_J57fLi.png);height:100px;border-bottom:2px solid #181818;">
+    <img style="position:relative; top:19px; left:3px;" src="http://d.thumbs.redditmedia.com/hYHQ9u1SFb4COMao.png" alt="ultra-hardcore" />
+    <a style="position:relative; top:27px; left:4px" href="http://reddit.com/r/ultrahardcore/"><img style="border:0" src="http://d.thumbs.redditmedia.com/f3s35HpkNRPPbG7o.png" alt="ultra-hardcore" /></a>
     </div>
+    <div id="wrapper">
     <p>(<b>New players</b> should definitely check out the <a href="http://reddit.com/r/ultrahardcore/wiki/playerfaq">PlayerFAQ</a> and <a href="http://reddit.com/r/ultrahardcore/wiki/glossary">Glossary</a> from the <a href="http://reddit.com/r/ultrahardcore/wiki/index">wiki</a>.)</p>
     <h1>Upcoming UHC matches</h1>
     <p>This page shows upcoming UHC matches from the <a href="http://reddit.com/r/ultrahardcore/">ultrahardcore</a> subreddit.  (Source data: JSONP version of <a href="http://www.reddit.com/r/ultrahardcore/search?q=flair%3AUpcoming_Match&amp;restrict_sr=on&amp;sort=new">this page</a>.)</p>
@@ -18,7 +30,7 @@
     <ul>
         <li><i>Italicized titles</i> indicate a 'best guess', as title is not perfectly <a href="http://www.reddit.com/r/ultrahardcore/comments/1gk1ss/a_proposal_standardized_match_post_titles/">formatted</a>.</li>
         <li><i>Italicized times</i> ("ago") indicate matches that have probably already begun, but that still have "Upcoming Match" flair.</li>
-        <li>Text size indicated how far ahead of time the match was advertised; small text is impromptus posted shortly before the match, large text is matches posted well in advance.
+        <li>Text size indicated how far ahead of time the match was advertised; small text is impromptus posted shortly before the match, large text is matches posted well in advance.</li>
     </ul>
     <noscript>(No data here, because Javascript is disabled on this page for some reason.)</noscript>
     <h3>Matches whose titles could not be parsed</h3>
@@ -28,7 +40,8 @@
     <div id="parsedcompletedplaceholder"></div>
     <noscript>(No data here, because Javascript is disabled on this page for some reason.)</noscript>
     <hr/>
-    (<a href="https://github.com/brianmcn/uhc-tools/blob/gh-pages/UHC-UpcomingMatches.html">Source code</a> for this page.  <a href="http://brianmcn.github.io/uhc-tools/UHC-UpcomingMatches.html">Self URL</a> of this page.)
+    <p>(<a href="https://github.com/brianmcn/uhc-tools/blob/gh-pages/UHC-UpcomingMatches.html">Source code</a> for this page.  <a href="http://brianmcn.github.io/uhc-tools/UHC-UpcomingMatches.html">Self URL</a> of this page.)</p>
+    </div>
     <script type="text/javascript">
         // NOTE lack of year info means this script will not work over new years (Dec N - Jan N+1)
 
